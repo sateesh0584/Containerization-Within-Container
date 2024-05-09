@@ -1,20 +1,34 @@
+# Use Ubuntu 22.04 as the base image
 FROM ubuntu:22.04
 
-# Update package lists and install dependencies
+# Update package lists and install necessary tools
 RUN apt-get update && \
-    apt-get install -y wget openjdk-11-jdk git sudo gnupg && \
+    apt-get install -y wget gnupg && \
     apt-get clean && \
     rm -rf /var/lib/apt/lists/*
 
-# Download Jenkins repository configuration
-RUN wget -q -O - https://pkg.jenkins.io/debian/jenkins.io.key | sudo apt-key add -
+# Install Java
+RUN apt-get update && \
+    apt-get install -y default-jdk && \
+    apt-get clean && \
+    rm -rf /var/lib/apt/lists/*
+
+# Add Jenkins repository
+RUN wget -q -O - https://pkg.jenkins.io/debian/jenkins.io.key | apt-key add -
 RUN sh -c 'echo deb http://pkg.jenkins.io/debian-stable binary/ > /etc/apt/sources.list.d/jenkins.list'
 
 # Update package lists and install Jenkins
 RUN apt-get update && \
-    apt-get install -y jenkins && \
+    apt-get install -y jenkins git sudo && \
     apt-get clean && \
     rm -rf /var/lib/apt/lists/*
 
-# Improved CMD for flexibility (choose option 1 or 2):
-CMD ["/usr/share/jenkins/jenkins.war"]
+# Allow jenkins user to execute sudo commands without password
+RUN echo "jenkins ALL=(ALL) NOPASSWD:ALL" >> /etc/sudoers
+
+# Change user to jenkins and set environment variables
+USER jenkins
+ENV USER jenkins
+
+# Set CMD to start Jenkins
+CMD java -jar /usr/share/jenkins/jenkins.war
