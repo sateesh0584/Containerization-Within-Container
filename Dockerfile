@@ -31,4 +31,4 @@ USER jenkins
 ENV USER jenkins
 
 # Set CMD to start Jenkins
-CMD java -jar /usr/share/jenkins/jenkins.war
+CMD java -jar /usr/lib/jenkins/jenkins.war
